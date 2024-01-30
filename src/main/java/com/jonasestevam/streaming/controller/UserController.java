@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jonasestevam.streaming.dto.UserDTO;
+import com.jonasestevam.streaming.dto.VideoDTO;
 import com.jonasestevam.streaming.services.UserService;
 
 import jakarta.validation.Valid;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -46,6 +48,11 @@ public class UserController {
     @PutMapping("/{id}/favorite/{videoId}")
     public Mono<UserDTO> addFavorite(@PathVariable String id, @PathVariable String videoId) {
         return userService.addFavorite(id, videoId);
+    }
+
+    @GetMapping("/{id}/recommended")
+    public Flux<VideoDTO> getRecommended(@PathVariable String id) {
+        return userService.getRecommendedVideos(id);
     }
 
 }

@@ -2,13 +2,14 @@ package com.jonasestevam.streaming.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.jonasestevam.streaming.dto.UserDTO;
+import com.jonasestevam.streaming.dto.VideoDTO;
 import com.jonasestevam.streaming.mapper.UserMapper;
 import com.jonasestevam.streaming.repository.UserRepository;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -16,6 +17,9 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private VideoService videoService;
 
     @Autowired
     UserMapper mapper;
@@ -56,6 +60,13 @@ public class UserService {
         return getUser(id).flatMap(user -> {
             user.getFavoriteList().add(monoVideoId);
             return repository.save(mapper.toEntity(user)).map(mapper::toDto);
+        });
+    }
+
+    public Flux<VideoDTO> getRecommendedVideos(String userId) {
+        return getUser(userId).flatMapMany(user -> {
+            return videoService.getCategoriesByVideoId(user.getFavoriteList())
+                    .flatMap(category -> videoService.getByCategories(category));
         });
     }
 }

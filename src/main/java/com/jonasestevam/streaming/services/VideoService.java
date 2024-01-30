@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.jonasestevam.streaming.dto.FilterDTO;
 import com.jonasestevam.streaming.dto.VideoDTO;
+import com.jonasestevam.streaming.enuns.CategoriesEnum;
 import com.jonasestevam.streaming.mapper.VideoMapper;
 import com.jonasestevam.streaming.model.Video;
 import com.jonasestevam.streaming.repository.VideoRepository;
@@ -134,6 +136,15 @@ public class VideoService {
 
     private Mono<Void> checkIfExists(String id) {
         return repository.existsById(id).flatMap(exists -> exists ? Mono.empty() : Mono.error(new NotFoundException()));
+    }
+
+    public Flux<CategoriesEnum> getCategoriesByVideoId(Set<String> videoIds) {
+        return repository.findByIdIn(videoIds).map(Video::getCategory);
+
+    }
+
+    public Flux<VideoDTO> getByCategories(CategoriesEnum category) {
+        return repository.findByCategory(category).map(mapper::toDto);
     }
 
 }
